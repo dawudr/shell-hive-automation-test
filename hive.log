@@ -1,0 +1,73 @@
+Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+Java HotSpot(TM) 64-Bit Server VM warning: Using incremental CMS is deprecated and will likely be removed in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/jars/hive-common-1.1.0-cdh5.10.0.jar!/hive-log4j.properties
+OK
+Time taken: 0.997 seconds
+OK
+Time taken: 0.071 seconds
+OK
+Time taken: 0.074 seconds
+OK
+Time taken: 0.076 seconds
+OK
+Time taken: 0.068 seconds
+OK
+Time taken: 0.071 seconds
+Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+Java HotSpot(TM) 64-Bit Server VM warning: Using incremental CMS is deprecated and will likely be removed in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/jars/hive-common-1.1.0-cdh5.10.0.jar!/hive-log4j.properties
+Query ID = edie.service_20170802155050_bd4ef981-9ea2-40f1-9a46-164467e94181
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1501657580870_0034, Tracking URL = https://sit-cm-controlnode2.node.sit.consul:8090/proxy/application_1501657580870_0034/
+Kill Command = /opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/lib/hadoop/bin/hadoop job  -kill job_1501657580870_0034
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2017-08-02 15:50:52,284 Stage-1 map = 0%,  reduce = 0%
+2017-08-02 15:51:00,532 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 8.06 sec
+2017-08-02 15:51:06,713 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 14.38 sec
+MapReduce Total cumulative CPU time: 14 seconds 380 msec
+Ended Job = job_1501657580870_0034
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 14.38 sec   HDFS Read: 188827803 HDFS Write: 20200000 SUCCESS
+Total MapReduce CPU Time Spent: 14 seconds 380 msec
+OK
+Time taken: 26.394 seconds, Fetched: 200000 row(s)
+Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+Java HotSpot(TM) 64-Bit Server VM warning: Using incremental CMS is deprecated and will likely be removed in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=512M; support was removed in 8.0
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/jars/hive-common-1.1.0-cdh5.10.0.jar!/hive-log4j.properties
+Query ID = edie.service_20170802155151_5ed0cf33-6a2a-4f55-9f05-e55c9b12922f
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1501657580870_0035, Tracking URL = https://sit-cm-controlnode2.node.sit.consul:8090/proxy/application_1501657580870_0035/
+Kill Command = /opt/cloudera/parcels/CDH-5.10.0-1.cdh5.10.0.p0.41/lib/hadoop/bin/hadoop job  -kill job_1501657580870_0035
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2017-08-02 15:51:28,369 Stage-1 map = 0%,  reduce = 0%
+2017-08-02 15:51:35,604 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 6.08 sec
+2017-08-02 15:51:40,742 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 8.78 sec
+MapReduce Total cumulative CPU time: 8 seconds 780 msec
+Ended Job = job_1501657580870_0035
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 8.78 sec   HDFS Read: 188832503 HDFS Write: 7 SUCCESS
+Total MapReduce CPU Time Spent: 8 seconds 780 msec
+OK
+Time taken: 25.264 seconds, Fetched: 1 row(s)

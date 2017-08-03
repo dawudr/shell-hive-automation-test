@@ -1,0 +1,7 @@
+TRUNCATE TABLE Raw.nectar_dat_initial1;
+TRUNCATE TABLE Staging.tb_acct_n_int_automation;
+TRUNCATE TABLE Staging.tb_loyalty_acct_card_n_int_automation;
+TRUNCATE TABLE Staging.tb_loyalty_acct_n_int_automation;
+TRUNCATE TABLE Information.loyalty_account_lkp_automation;
+TRUNCATE TABLE Information.loyalty_account_card_dim_automation;
+

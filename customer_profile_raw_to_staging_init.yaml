@@ -1,0 +1,286 @@
+!Plan
+operations:
+
+  - !sql {tableName: 'household_tmp',sqlQuery: "SELECT  DISTINCT  
+ cast(trim(HH_KEY) as bigint) AS HOUSEHOLD_NUM from raw.online_dat_initial"}
+
+  - !hive {overwrite: true, table: STAGING.TB_HOUSEHOLD_N_INT, sqlQuery: "SELECT reflect('java.util.UUID', 'randomUUID') as HOUSEHOLD_ID,HOUSEHOLD_NUM from household_tmp" }     
+
+  - !hive {table: STAGING.TB_HOUSEHOLD_N_INT, sqlQuery: "SELECT reflect('java.util.UUID', 'randomUUID') as HOUSEHOLD_ID,-99 as HOUSEHOLD_NUM" }     
+    
+  - !print {sqlQuery: "select  'LOADED TB_HOUSEHOLD_N_INT' " }
+  
+  - !sql {tableName: 'UNIQUE_CUST_TMP',sqlQuery: "select distinct ic_key,hh_key,indvl_gendr_code,paf_postcode,indvl_date_birth,sty_creation_date,sty_cust_status from raw.online_dat_initial"}
+
+  - !sql {tableName: 'NECTAR_CUST_TMP',sqlQuery: "select distinct a.ic_key,a.hh_key,a.indvl_gender,a.paf_postcode,a.indvl_date_birth, a.lms_customer_create_date , a.sty_cust_status from raw.nectar_dat_initial1 a 
+  left outer join raw.online_dat_initial b on 
+  a.ic_key =  b.ic_key where b.ic_key is null"}
+
+  - !sql {tableName: 'UNIQUE_SUPP_TMP',sqlQuery: "select DISTINCT ENTERPRISE_CUSTomer_ID,stives_supr_flag,noemailflag from raw.suppression_dat_initial"}
+
+
+  - !sql {tableName: 'customer_tmp',sqlQuery: "select distinct  
+  CAST(TRIM(a.IC_KEY) AS BIGINT) AS ECID,
+  B.HOUSEHOLD_ID,
+  null as    LOYALTY_TIER_CD  ,
+null as     MOBILE_APP_USER_IND ,
+c.stives_supr_flag  as    MAILABLE_IND  ,
+c.noemailflag  as    EMAILABLE_IND  ,
+null as     CAT_ACTIVE_IND  ,
+null as     JS_MAIN_ACTIVE_IND ,
+round(datediff(cast(current_date as string),from_unixtime(unix_timestamp(trim(a.sty_creation_date), 'yyyymmdd')) ) /365) as      TENURE_YEARS_NUM  , 
+null as     SHARE_OF_WALLET ,
+substring(a.indvl_date_birth,1,4) as     BIRTH_YR_ID  ,
+substring(a.indvl_date_birth,5,2) as     BIRTH_MONTH_ID  ,
+a.indvl_gendr_code as     GENDER_CD ,
+a.paf_postcode as    POSTCODE ,a.sty_cust_status as CUST_ACCT_STATUS 
+ from 
+  UNIQUE_CUST_TMP a left outer join UNIQUE_SUPP_TMP c 
+on  trim(a.ic_key) = trim(c.ENTERPRISE_CUSTomer_ID)
+  join staging.tb_household_n_int b on  cast(trim(a.hh_key) as bigint)= b.HOUSEHOLD_NUM"}
+  
+    
+  - !print {sqlQuery: "select  'LOADED customer_tmp' " }
+
+  - !sql {tableName: 'customer_from_nectar_tmp',sqlQuery: "select distinct  
+  CAST(TRIM(a.IC_KEY) AS BIGINT) AS ECID,
+  B.HOUSEHOLD_ID,
+  null as    LOYALTY_TIER_CD  ,
+null as     MOBILE_APP_USER_IND ,
+c.stives_supr_flag  as    MAILABLE_IND  ,
+c.noemailflag  as    EMAILABLE_IND  ,
+null as     CAT_ACTIVE_IND  ,
+null as     JS_MAIN_ACTIVE_IND ,
+round(datediff(cast(current_date as string),from_unixtime(unix_timestamp(trim(a.lms_customer_create_date), 'yyyymmdd')) ) /365) as      TENURE_YEARS_NUM  , 
+null as     SHARE_OF_WALLET ,
+substring(a.indvl_date_birth,1,4) as     BIRTH_YR_ID  ,
+substring(a.indvl_date_birth,5,2) as     BIRTH_MONTH_ID  ,
+a.indvl_gender as     GENDER_CD ,
+a.paf_postcode as    POSTCODE ,a.sty_cust_status as CUST_ACCT_STATUS 
+ from 
+  NECTAR_CUST_TMP a left outer join UNIQUE_SUPP_TMP c 
+on  trim(a.ic_key) = trim(c.ENTERPRISE_CUSTomer_ID)
+  left outer join staging.tb_household_n_int b 
+  on  cast(trim(a.hh_key) as bigint)= b.HOUSEHOLD_NUM"}
+    
+  - !print {sqlQuery: "select  'LOADED customer_from_nectar_tmp' " }
+
+
+  - !hive {overwrite: true, table: STAGING.TB_ENTERPRISE_CUST_N_INT, sqlQuery: "select reflect('java.util.UUID', 'randomUUID') as ENTERPRISE_CUST_ID , ECID,HOUSEHOLD_ID,
+  LOYALTY_TIER_CD,
+  MOBILE_APP_USER_IND,
+  MAILABLE_IND,
+  EMAILABLE_IND,
+CAT_ACTIVE_IND,JS_MAIN_ACTIVE_IND,
+TENURE_YEARS_NUM,
+SHARE_OF_WALLET,
+BIRTH_YR_ID,
+BIRTH_MONTH_ID, GENDER_CD,POSTCODE,CUST_ACCT_STATUS from customer_tmp" }   
+
+    
+  - !print {sqlQuery: "select  'LOADED customer_tmp into TB_ENTERPRISE_CUST_N_INT' " }
+
+  - !hive {table: STAGING.TB_ENTERPRISE_CUST_N_INT, sqlQuery: "select reflect('java.util.UUID', 'randomUUID') as ENTERPRISE_CUST_ID , ECID,HOUSEHOLD_ID,
+  LOYALTY_TIER_CD,
+  MOBILE_APP_USER_IND,
+  MAILABLE_IND,
+  EMAILABLE_IND,
+CAT_ACTIVE_IND,JS_MAIN_ACTIVE_IND,
+TENURE_YEARS_NUM,
+SHARE_OF_WALLET,
+BIRTH_YR_ID,
+BIRTH_MONTH_ID, GENDER_CD,POSTCODE,CUST_ACCT_STATUS from customer_from_nectar_tmp" }   
+    
+  - !print {sqlQuery: "select  'LOADED customer_from_nectar_tmp into TB_ENTERPRISE_CUST_N_INT' " }
+
+
+  - !hive { table: STAGING.TB_ENTERPRISE_CUST_N_INT, sqlQuery: "select reflect('java.util.UUID', 'randomUUID') as ENTERPRISE_CUST_ID ,-99 as  ECID, null as HOUSEHOLD_ID,
+  null as LOYALTY_TIER_CD,
+  null as MOBILE_APP_USER_IND,
+  null as MAILABLE_IND,
+  null as EMAILABLE_IND,
+null as CAT_ACTIVE_IND,null as JS_MAIN_ACTIVE_IND,
+null as TENURE_YEARS_NUM,
+null as SHARE_OF_WALLET,
+null as BIRTH_YR_ID,
+null as BIRTH_MONTH_ID, null as GENDER_CD,null as POSTCODE,null as CUST_ACCT_STATUS " }   
+
+  - !sql {tableName: 'cust_sk_tmp',sqlQuery: "select 
+  I.ENTERPRISE_CUST_ID 
+  ,I.ECID from  STAGING.TB_ENTERPRISE_CUST_N_INT I, (
+  select ECID, max(created_ts) as created_ts from STAGING.TB_ENTERPRISE_CUST_N_INT group by ecid) M where I.created_ts=M.created_ts AND I.ecid=M.ecid "}
+  
+  - !sql {tableName: 'latest_cust_sk_tmp',sqlQuery: "select 
+  max(ENTERPRISE_CUST_ID ) as ENTERPRISE_CUST_ID ,ECID
+  from cust_sk_tmp group by ECID"}
+
+  - !sql {tableName: 'cust_supp_tmp',sqlQuery: "SELECT b.ENTERPRISE_CUST_ID as ENTERPRISE_CUST_ID,
+from_unixtime(unix_timestamp(update_date_timestamp, 'yyyyMMddHHmmss')) as update_date_timestamp,
+TRIM(gas_suppr_flag) as GAS_SUPRSN_FLAG ,
+TRIM(ndr_suppr_flag) as NDR_SUPRSN_FLAG,
+TRIM(quinetic_gas_suppr_flag) as QUINETIC_GAS_SUPRSN_FLAG,
+TRIM(quinetic_deceased_suppr_flag) as QUINETIC_DECEASED_SUPRSN_FLAG,
+TRIM(mps_suppr_flag) as MPS_SUPRSN_FLAG ,
+TRIM(smartfocus_suppr_flag) as SMART_FOCUS_SUPRSN_FLAG ,
+TRIM(stives_supr_flag) as ST_IVES_SUPRSN_FLAG ,
+TRIM(manual_supression_flag) as MANUAL_SUPRSN_FLAG
+FROM raw.suppression_dat_initial a, latest_cust_sk_tmp  b 
+where b.ecid= cast(a.Enterprise_Customer_Id as bigint)"}
+ 
+  - !hive {overwrite: true, table: STAGING.TB_ENTERPRISE_CUST_SUPPRESSION_INT, sqlQuery: "
+select ENTERPRISE_CUST_ID,update_date_timestamp,GAS_SUPRSN_FLAG,NDR_SUPRSN_FLAG,
+QUINETIC_GAS_SUPRSN_FLAG,QUINETIC_DECEASED_SUPRSN_FLAG,MPS_SUPRSN_FLAG,SMART_FOCUS_SUPRSN_FLAG,ST_IVES_SUPRSN_FLAG ,MANUAL_SUPRSN_FLAG
+from cust_supp_tmp  " }  
+
+    
+  - !print {sqlQuery: "select  'LOADED TB_ENTERPRISE_CUST_SUPPRESSION_INT' " }
+
+
+  - !sql {tableName: 'cust_pref_tmp',sqlQuery: "SELECT b.ENTERPRISE_CUST_ID as ENTERPRISE_CUST_ID,
+from_unixtime(unix_timestamp(update_date_timestamp, 'yyyyMMddHHmmss')) as update_date_timestamp,
+TRIM(recinfodircomp_flag) as RECEIVE_INF_DIRECT_CMP_FLAG,
+TRIM(contformktres_flag) as CONTACT_FOR_MKT_RESPONSE_FLAG,
+TRIM(recmktcommbyemail_flag) as RECEIVE_COMM_BY_EMAIL_FLAG,
+TRIM(usrcntctablebyph_flag) as USER_CNTBL_BY_PHONE_FLAG,
+TRIM(usrcntctablebysms_flag) as USER_CNTBL_BY_SMS_FLAG,
+TRIM(onlnconstocntnt) as ONLN_CONSENT_TO_CONTACT_FLAG,
+TRIM(email_unsubscribe_flag) as EMAIL_UNSUBSCRIBED_FLAG,
+TRIM(email_hardbounce_flag) as EMAIL_HARD_BOUNCE_FLAG,
+TRIM(noemailflag) as NO_EMAIL_FLAG,
+TRIM(nophoneflag) as NO_PHONE_FLAG,
+TRIM(nonpafvalid) as NO_PAF_VALID_FLAG FROM raw.suppression_dat_initial a, 
+latest_cust_sk_tmp b 
+where b.ecid= cast(trim(a.Enterprise_Customer_Id) as bigint)"}  
+ 
+  - !hive {overwrite: true, table: STAGING.TB_ENTERPRISE_CUST_COMMN_PREF_INT, sqlQuery: "select 
+  ENTERPRISE_CUST_ID ,update_date_timestamp ,RECEIVE_INF_DIRECT_CMP_FLAG,
+CONTACT_FOR_MKT_RESPONSE_FLAG,RECEIVE_COMM_BY_EMAIL_FLAG,USER_CNTBL_BY_PHONE_FLAG,
+USER_CNTBL_BY_SMS_FLAG,ONLN_CONSENT_TO_CONTACT_FLAG,EMAIL_UNSUBSCRIBED_FLAG,
+EMAIL_HARD_BOUNCE_FLAG,NO_EMAIL_FLAG,NO_PHONE_FLAG, NO_PAF_VALID_FLAG
+  from cust_pref_tmp" }
+    
+  - !print {sqlQuery: "select  'LOADED TB_ENTERPRISE_CUST_COMMN_PREF_INT' " }
+
+  - !sql {tableName: 'primary_acct_tmp',sqlQuery: "select min(I.ic_key) as ic_key, I.lms_party_account_no as acct_num,  I.lms_customer_create_date from raw.nectar_dat_initial1 I, 
+(select lms_party_account_no , min(lms_customer_create_date) as lms_customer_create_date 
+from raw.nectar_dat_initial1 group by lms_party_account_no ) M
+where I.lms_customer_create_date=M.lms_customer_create_date
+and I.lms_party_account_no = M.lms_party_account_no 
+group by I.lms_party_account_no,  I.lms_customer_create_date"}
+
+
+
+  - !sql {tableName: 'party_acct_tmp',sqlQuery: "select distinct
+  lms_party_account_no as acct_num, 
+  trim(b.ic_key) as ECID,
+'1' AS ACCT_UOM_ID,
+from_unixtime(unix_timestamp(cast(trim(b.lms_customer_create_date) as string), 'yyyyMMdd'))  as start_ts,
+from_unixtime(unix_timestamp(cast(trim(a.sty_creation_date) as string), 'yyyyMMdd')) AS END_TS,
+'31' AS ACCT_TYPE_ID ,
+lms_home_store_location
+from raw.nectar_dat_initial1 a, primary_acct_tmp b
+where lms_party_account_no = b.acct_num 
+and a.lms_customer_create_date = b.lms_customer_create_date 
+and a.ic_key = b.ic_key"}
+
+    
+  - !print {sqlQuery: "select  'LOADED party_acct_tmp' " }
+
+
+  - !sql {tableName: 'acct_tmp',sqlQuery: "SELECT distinct
+a.acct_num,
+a.ACCT_UOM_ID,
+a.start_ts,
+a.END_TS,
+a.ACCT_TYPE_ID ,
+b.ENTERPRISE_CUST_ID from  
+party_acct_tmp a, latest_cust_sk_tmp b
+where b.ecid= cast(a.ecid as bigint)"}
+
+    
+  - !print {sqlQuery: "select  'LOADED acct_tmp' " }
+ 
+  - !hive {overwrite: true, table: STAGING.TB_ACCT_N_INT_AUTOMATION, sqlQuery: "select 
+  reflect('java.util.UUID', 'randomUUID') AS ACCT_ID ,
+acct_num,ACCT_UOM_ID,start_ts,
+END_TS,ACCT_TYPE_ID ,ENTERPRISE_CUST_ID 
+from acct_tmp  " }
+  
+    
+  - !print {sqlQuery: "select  'LOADED TB_ACCT_N_INT_AUTOMATION' " }
+ 
+  - !sql {tableName: 'loyalty_acct_tmp', sqlQuery: "SELECT distinct 
+b.acct_id as loyalty_acct_id,
+null as loyalty_program_id,
+cast(trim(a.lms_home_store_location) as int) as home_loc_id,
+null as ACCT_STAT_CD ,
+b.acct_num as loyalty_acct_num,
+b.start_ts  as loyalty_acct_open_dt ,
+NULL as loyalty_acct_close_dt ,
+b.start_ts  as start_ts,
+null as END_TS
+FROM party_acct_tmp a , staging.TB_ACCT_N_INT_AUTOMATION b 
+where b.acct_num = a.acct_num" }  
+  
+   
+  - !print {sqlQuery: "select  'LOADED loyalty_acct_tmp'" }    
+
+
+  - !hive {overwrite: true, table: STAGING.TB_LOYALTY_ACCT_N_INT_AUTOMATION, sqlQuery: "select distinct
+loyalty_acct_id,
+loyalty_program_id,
+home_loc_id,
+ACCT_STAT_CD ,
+loyalty_acct_num,
+loyalty_acct_open_dt ,
+loyalty_acct_close_dt ,
+start_ts,
+END_TS
+from loyalty_acct_tmp " }  
+
+  - !print {sqlQuery: "select  'LOADED TB_LOYALTY_ACCT_N_INT_AUTOMATION'" }    
+  
+  
+  - !sql {tableName: 'loyalty_sk_tmp',sqlQuery: "select I.loyalty_acct_id as loyalty_acct_id,I.loyalty_acct_num as loyalty_acct_num from STAGING.TB_LOYALTY_ACCT_N_INT_AUTOMATION I, (
+  select loyalty_acct_num, max(created_ts) as created_ts from STAGING.TB_LOYALTY_ACCT_N_INT_AUTOMATION group by loyalty_acct_num) M where I.created_ts=M.created_ts AND I.loyalty_acct_num=M.loyalty_acct_num"}
+  
+
+  - !sql {tableName: 'latest_loyalty_sk_tmp',sqlQuery: "select 
+  max(loyalty_acct_id) as loyalty_acct_id ,loyalty_acct_num
+  from loyalty_sk_tmp group by loyalty_acct_num"}
+
+  
+  - !print {sqlQuery: "select  'LOADED latest_loyalty_sk_tmp'" }    
+  
+  - !sql {tableName: 'nectar_tmp',sqlQuery: "SELECT distinct
+ic_key ECID, 
+sty_rcnum   as  LOYALTY_ACCT_CARD_NUM,
+lms_party_account_no  as loyalty_acct_num,
+null as GHOST_ACCT_CARD_IND 
+from raw.nectar_dat_initial1"}
+  
+  - !print {sqlQuery: "select  'LOADED nectar_tmp'" }    
+
+  - !sql {tableName: 'loyalty_card_tmp',sqlQuery: "Select distinct 
+c.loyalty_acct_id as loyalty_acct_id,
+b.enterprise_cust_id  as enterprise_cust_id,
+a.LOYALTY_ACCT_CARD_NUM as LOYALTY_ACCT_CARD_NUM,
+a.GHOST_ACCT_CARD_IND as GHOST_ACCT_CARD_IND
+from nectar_tmp a ,latest_cust_sk_tmp b ,latest_loyalty_sk_tmp c
+where b.ecid= a.ecid and
+c.loyalty_acct_num = a.loyalty_acct_num"}
+
+  - !hive {overwrite: true, table: STAGING.TB_LOYALTY_ACCT_CARD_N_INT_AUTOMATION, sqlQuery: "Select 
+reflect('java.util.UUID', 'randomUUID') AS LOYALTY_ACCT_CARD_ID,
+loyalty_acct_id,
+enterprise_cust_id,
+LOYALTY_ACCT_CARD_NUM,
+GHOST_ACCT_CARD_IND
+from loyalty_card_tmp a " }
+
+  - !print {sqlQuery: "select  'LOADED TB_LOYALTY_ACCT_CARD_N_INT_AUTOMATION'" }    
+  
+    
+  - !print {sqlQuery: "select  'LOADED SUCCESSFULLY' "}
+
+
